@@ -1,0 +1,21 @@
+name = "speaky-signal"
+main = "index.ts"
+compatibility_date = "2026-03-30"
+workers_dev = true
+minify = true
+
+[observability]
+enabled = true
+
+[vars]
+SUPABASE_URL = "https://zovddrxukactjyzchavo.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdmRkcnh1a2FjdGp5emNoYXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyMzY1NTYsImV4cCI6MjA2NzgxMjU1Nn0.S0woMp4kLa8o2TWO1W2yuuAt9xUt59R2OFx21Z_ZqoM"
+
+[durable_objects]
+bindings = [
+  { name = "MATCHMAKER", class_name = "Matchmaker" }
+]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Matchmaker"]
