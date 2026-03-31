@@ -76,8 +76,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    await get().hydrateFromSession(session);
-    set({ initialized: true });
+    try {
+      await get().hydrateFromSession(session);
+    } finally {
+      set({ initialized: true });
+    }
   },
   hydrateFromSession: async (session) => {
     if (!session) {
@@ -91,31 +94,48 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
 
-    await configurePurchases(session.user.id);
-    const accountData = await fetchAccountData(session.user.id);
+    const defaultPreferences: MatchPreferences = {
+      country_filters: [],
+      gender_filters: [],
+      interest_filters: [],
+      updated_at: new Date().toISOString(),
+      user_id: session.user.id,
+    };
+    const defaultSubscription: SubscriptionState = {
+      entitlement_id: null,
+      expires_at: null,
+      is_active: false,
+      product_id: null,
+      updated_at: new Date().toISOString(),
+      user_id: session.user.id,
+    };
 
-    set({
-      authError: null,
-      preferences:
-        accountData.preferences ?? {
-          country_filters: [],
-          gender_filters: [],
-          interest_filters: [],
-          updated_at: new Date().toISOString(),
-          user_id: session.user.id,
-        },
-      profile: accountData.profile,
-      session,
-      subscription:
-        accountData.subscription ?? {
-          entitlement_id: null,
-          expires_at: null,
-          is_active: false,
-          product_id: null,
-          updated_at: new Date().toISOString(),
-          user_id: session.user.id,
-        },
-    });
+    try {
+      await configurePurchases(session.user.id);
+      const accountData = await fetchAccountData(session.user.id);
+
+      set({
+        authError: null,
+        preferences: accountData.preferences ?? defaultPreferences,
+        profile: accountData.profile,
+        session,
+        subscription: accountData.subscription ?? defaultSubscription,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to load your Speaky account right now.";
+
+      set({
+        authError: message,
+        preferences: get().preferences ?? defaultPreferences,
+        profile: get().profile,
+        session,
+        subscription: get().subscription ?? defaultSubscription,
+      });
+      throw error;
+    }
   },
   initialized: false,
   isAuthenticating: false,

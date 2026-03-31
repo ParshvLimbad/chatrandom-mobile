@@ -1,20 +1,44 @@
 import { useCallback, useEffect, useRef } from "react";
-import {
-  AdEventType,
-  InterstitialAd,
-  TestIds,
-} from "react-native-google-mobile-ads";
 
 import { env } from "@/lib/env";
+import { nativeModulesSupported } from "@/lib/runtime";
+
+interface InterstitialAdLike {
+  addAdEventListener: (
+    type: string,
+    listener: () => void,
+  ) => () => void;
+  load: () => void;
+  show: () => void;
+}
+
+interface GoogleMobileAdsModuleLike {
+  AdEventType: {
+    CLOSED: string;
+    ERROR: string;
+    LOADED: string;
+  };
+  InterstitialAd: {
+    createForAdRequest: (unitId: string) => InterstitialAdLike;
+  };
+  TestIds: {
+    INTERSTITIAL: string;
+  };
+}
 
 export function useInterstitialAd(enabled: boolean): () => void {
-  const adRef = useRef<InterstitialAd | null>(null);
+  const adRef = useRef<InterstitialAdLike | null>(null);
   const loadedRef = useRef(false);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !nativeModulesSupported) {
       return;
     }
+
+    const googleMobileAds =
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require("react-native-google-mobile-ads") as GoogleMobileAdsModuleLike;
+    const { AdEventType, InterstitialAd, TestIds } = googleMobileAds;
 
     const ad = InterstitialAd.createForAdRequest(
       env.admobInterstitialUnitId || TestIds.INTERSTITIAL,

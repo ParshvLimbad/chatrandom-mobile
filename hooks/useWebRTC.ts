@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
+import type {
   MediaStream,
   RTCIceCandidate,
   RTCPeerConnection,
-  RTCSessionDescription,
-  mediaDevices,
 } from "react-native-webrtc";
 
 import type {
@@ -13,8 +11,11 @@ import type {
   QualityLevel,
 } from "@/lib/domain";
 import type { SignalPayload } from "@/lib/protocol";
+import { nativeModulesSupported } from "@/lib/runtime";
 
-const STUN_SERVERS: RTCIceServer[] = [
+type WebRTCModule = typeof import("react-native-webrtc");
+
+const STUN_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
 ];
@@ -43,6 +44,15 @@ interface PeerConnectionWithEvents extends RTCPeerConnection {
   onicecandidate?: (event: IceCandidateEventLike) => void;
   oniceconnectionstatechange?: () => void;
   ontrack?: (event: TrackEventLike) => void;
+}
+
+function getWebRTCModule(): WebRTCModule | null {
+  if (!nativeModulesSupported) {
+    return null;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require("react-native-webrtc") as WebRTCModule;
 }
 
 export interface UseWebRTCResult {
@@ -184,13 +194,18 @@ export function useWebRTC({
 
   const createPeerConnection = useCallback(
     (session: MatchSession): RTCPeerConnection => {
+      const webRTC = getWebRTCModule();
+      if (!webRTC) {
+        throw new Error("WebRTC requires a development build.");
+      }
+
       cleanupPeerSession();
 
-      const peerConnection = new RTCPeerConnection({
+      const peerConnection = new webRTC.RTCPeerConnection({
         iceServers: STUN_SERVERS,
       }) as PeerConnectionWithEvents;
 
-      const nextRemoteStream = new MediaStream();
+      const nextRemoteStream = new webRTC.MediaStream();
       remoteStreamRef.current = nextRemoteStream;
       setRemoteStream(nextRemoteStream);
 
@@ -202,7 +217,7 @@ export function useWebRTC({
         });
 
         if (remoteStreamRef.current) {
-          const refreshedStream = new MediaStream();
+          const refreshedStream = new webRTC.MediaStream();
           remoteStreamRef.current.getTracks().forEach((track) => {
             refreshedStream.addTrack(track);
           });
@@ -288,6 +303,10 @@ export function useWebRTC({
 
       const peerConnection =
         peerConnectionRef.current ?? createPeerConnection(session);
+      const webRTC = getWebRTCModule();
+      if (!webRTC) {
+        return;
+      }
 
       if (
         payload.kind === "offer" &&
@@ -295,7 +314,7 @@ export function useWebRTC({
         payload.description.type
       ) {
         await peerConnection.setRemoteDescription(
-          new RTCSessionDescription({
+          new webRTC.RTCSessionDescription({
             sdp: payload.description.sdp,
             type: payload.description.type,
           }),
@@ -316,7 +335,7 @@ export function useWebRTC({
         payload.description.type
       ) {
         await peerConnection.setRemoteDescription(
-          new RTCSessionDescription({
+          new webRTC.RTCSessionDescription({
             sdp: payload.description.sdp,
             type: payload.description.type,
           }),
@@ -326,7 +345,7 @@ export function useWebRTC({
 
       if (payload.kind === "ice_candidate" && payload.candidate) {
         await peerConnection.addIceCandidate(
-          new RTCIceCandidate(payload.candidate),
+          new webRTC.RTCIceCandidate(payload.candidate),
         );
       }
     },
@@ -370,9 +389,17 @@ export function useWebRTC({
         return;
       }
 
+      const webRTC = getWebRTCModule();
+      if (!webRTC) {
+        setPermissionError(
+          "Video and voice chat require a development build. Expo Go cannot load WebRTC.",
+        );
+        return;
+      }
+
       try {
         setPermissionError(null);
-        const stream = await mediaDevices.getUserMedia({
+        const stream = await webRTC.mediaDevices.getUserMedia({
           audio: true,
           video:
             mode === "video"

@@ -129,7 +129,7 @@ export default function OnboardingScreen(): JSX.Element {
     try {
       await saveOnboarding(payload);
       await requestPermissions();
-      router.replace("/(tabs)/video");
+      router.replace("/video");
     } catch (error) {
       setErrorText(
         error instanceof Error ? error.message : "Failed to save onboarding.",

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Speaky",
     "slug": "speaky",
-    "version": "1.0.1",
+    "version": "20.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "speaky",
@@ -20,7 +20,7 @@
     },
     "android": {
       "package": "chat.speaky.app",
-      "versionCode": 5,
+      "versionCode": 20,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#08111f"
@@ -65,7 +65,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3237855763291333~5680255634"
+          "androidAppId": "ca-app-pub-3237855763291333~5680255634",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ],
       "@config-plugins/react-native-webrtc",

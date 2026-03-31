@@ -5,9 +5,9 @@ import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import mobileAds from "react-native-google-mobile-ads";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { nativeModulesSupported } from "@/lib/runtime";
 import { AppBootstrap } from "@/providers/AppBootstrap";
 
 const NAV_THEME = {
@@ -24,7 +24,19 @@ const NAV_THEME = {
 
 export default function RootLayout(): JSX.Element {
   useEffect(() => {
-    void mobileAds().initialize();
+    if (!nativeModulesSupported) {
+      return;
+    }
+
+    void (async () => {
+      const googleMobileAdsModule = await import("react-native-google-mobile-ads");
+      const mobileAds =
+        googleMobileAdsModule.default ?? googleMobileAdsModule.MobileAds;
+
+      if (typeof mobileAds === "function") {
+        await mobileAds().initialize();
+      }
+    })();
   }, []);
 
   return (
@@ -40,6 +52,7 @@ export default function RootLayout(): JSX.Element {
           >
             <Stack.Screen name="index" />
             <Stack.Screen name="auth" />
+            <Stack.Screen name="auth-callback" />
             <Stack.Screen name="onboarding" />
             <Stack.Screen name="(tabs)" />
           </Stack>

@@ -19,5 +19,5 @@ export default function IndexRoute(): JSX.Element | null {
     return <Redirect href="/onboarding" />;
   }
 
-  return <Redirect href="/(tabs)/video" />;
+  return <Redirect href="/video" />;
 }

@@ -26,7 +26,7 @@ export default function AuthScreen(): JSX.Element {
     }
 
     if (profile?.onboarding_completed_at) {
-      router.replace("/(tabs)/video");
+      router.replace("/video");
       return;
     }
 

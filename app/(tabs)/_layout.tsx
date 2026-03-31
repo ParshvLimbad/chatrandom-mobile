@@ -18,7 +18,7 @@ export default function TabsLayout(): JSX.Element {
         onPress={() =>
           router.push({
             params: { focus: "paywall" },
-            pathname: "/(tabs)/settings",
+            pathname: "/settings",
           })
         }
         style={styles.upgradeButton}

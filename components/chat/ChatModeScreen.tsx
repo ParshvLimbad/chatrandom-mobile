@@ -1,6 +1,6 @@
 import { formatDistanceToNowStrict } from "date-fns";
 import { captureRef } from "react-native-view-shot";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ComponentType, useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Linking,
@@ -8,22 +8,40 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  type StyleProp,
   Text,
   TextInput,
   View,
+  type ViewStyle,
 } from "react-native";
-import { RTCView } from "react-native-webrtc";
 
 import { AdBanner } from "@/components/ads/AdBanner";
 import { AudioWave } from "@/components/chat/AudioWave";
 import { ReportModal } from "@/components/chat/ReportModal";
 import type { ChatMode, ReportReason } from "@/lib/domain";
 import { classifyCapturedFrame, isExplicitContent } from "@/lib/moderation";
+import { nativeModulesSupported } from "@/lib/runtime";
 import { useRandomChat } from "@/hooks/useRandomChat";
 
 interface ChatModeScreenProps {
   mode: ChatMode;
 }
+
+interface RTCViewPropsLike {
+  mirror?: boolean;
+  objectFit?: "contain" | "cover";
+  streamURL: string;
+  style?: StyleProp<ViewStyle>;
+}
+
+const RTCViewComponent: ComponentType<RTCViewPropsLike> | null =
+  nativeModulesSupported
+    ? ((
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require("react-native-webrtc") as typeof import("react-native-webrtc")
+      )
+        .RTCView as ComponentType<RTCViewPropsLike>)
+    : null;
 
 function getModeTitle(mode: ChatMode): string {
   if (mode === "video") {
@@ -169,6 +187,15 @@ export function ChatModeScreen({ mode }: ChatModeScreenProps): JSX.Element {
             </View>
           ) : null}
 
+          {!nativeModulesSupported ? (
+            <View style={styles.banner}>
+              <Text style={styles.bannerText}>
+                Expo Go disables WebRTC, AdMob, and RevenueCat for this app. Use a
+                development build for full Speaky features.
+              </Text>
+            </View>
+          ) : null}
+
           {permissionError && mode !== "text" ? (
             <View style={styles.permissionCard}>
               <Text style={styles.permissionTitle}>Permissions blocked</Text>
@@ -187,8 +214,8 @@ export function ChatModeScreen({ mode }: ChatModeScreenProps): JSX.Element {
           <View ref={stageRef} style={styles.stage}>
             {mode === "video" ? (
               <>
-                {remoteStreamUrl ? (
-                  <RTCView
+                {remoteStreamUrl && RTCViewComponent ? (
+                  <RTCViewComponent
                     mirror={false}
                     objectFit="cover"
                     streamURL={remoteStreamUrl}
@@ -206,8 +233,8 @@ export function ChatModeScreen({ mode }: ChatModeScreenProps): JSX.Element {
                     </Text>
                   </View>
                 )}
-                {localStreamUrl ? (
-                  <RTCView
+                {localStreamUrl && RTCViewComponent ? (
+                  <RTCViewComponent
                     mirror
                     objectFit="cover"
                     streamURL={localStreamUrl}

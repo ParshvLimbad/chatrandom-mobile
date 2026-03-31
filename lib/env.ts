@@ -1,14 +1,10 @@
-const requiredKeys = [
-  "EXPO_PUBLIC_SUPABASE_URL",
-  "EXPO_PUBLIC_SUPABASE_ANON_KEY",
-  "EXPO_PUBLIC_WORKER_URL",
-  "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY",
-] as const;
-
-for (const key of requiredKeys) {
-  if (!process.env[key]) {
-    console.warn(`[env] Missing ${key}. Configure it in .env before running Speaky.`);
-  }
+if (
+  __DEV__ &&
+  !process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY
+) {
+  console.warn(
+    "[env] Missing EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY. Configure it in .env to enable subscriptions.",
+  );
 }
 
 export const env = {

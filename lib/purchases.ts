@@ -1,22 +1,32 @@
-import Purchases, {
-  type CustomerInfo,
-  type PurchasesPackage,
+import type {
+  CustomerInfo,
+  PurchasesPackage,
 } from "react-native-purchases";
 
 import { env } from "@/lib/env";
+import { nativeModulesSupported } from "@/lib/runtime";
 
 let configuredUserId: string | null = null;
 
-export async function configurePurchases(userId: string): Promise<void> {
-  if (!env.revenueCatAndroidApiKey) {
-    return;
+async function loadPurchasesModule(): Promise<typeof import("react-native-purchases") | null> {
+  if (!nativeModulesSupported || !env.revenueCatAndroidApiKey) {
+    return null;
   }
 
+  return import("react-native-purchases");
+}
+
+export async function configurePurchases(userId: string): Promise<void> {
   if (configuredUserId === userId) {
     return;
   }
 
-  await Purchases.configure({
+  const purchasesModule = await loadPurchasesModule();
+  if (!purchasesModule) {
+    return;
+  }
+
+  await purchasesModule.default.configure({
     apiKey: env.revenueCatAndroidApiKey,
     appUserID: userId,
   });
@@ -24,11 +34,12 @@ export async function configurePurchases(userId: string): Promise<void> {
 }
 
 export async function getPrimaryPaywallPackage(): Promise<PurchasesPackage | null> {
-  if (!env.revenueCatAndroidApiKey) {
+  const purchasesModule = await loadPurchasesModule();
+  if (!purchasesModule) {
     return null;
   }
 
-  const offerings = await Purchases.getOfferings();
+  const offerings = await purchasesModule.default.getOfferings();
   return offerings.current?.availablePackages[0] ?? null;
 }
 
@@ -38,10 +49,20 @@ export async function purchasePrimaryPackage(): Promise<CustomerInfo | null> {
     return null;
   }
 
-  const result = await Purchases.purchasePackage(packageToPurchase);
+  const purchasesModule = await loadPurchasesModule();
+  if (!purchasesModule) {
+    return null;
+  }
+
+  const result = await purchasesModule.default.purchasePackage(packageToPurchase);
   return result.customerInfo;
 }
 
 export async function restorePurchases(): Promise<CustomerInfo> {
-  return Purchases.restorePurchases();
+  const purchasesModule = await loadPurchasesModule();
+  if (!purchasesModule) {
+    throw new Error("RevenueCat is only available in a development build.");
+  }
+
+  return purchasesModule.default.restorePurchases();
 }
