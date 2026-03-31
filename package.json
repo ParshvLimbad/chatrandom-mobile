@@ -43,6 +43,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.4",
+    "react-native-fs": "^2.20.0",
     "react-native-google-mobile-ads": "^16.3.1",
     "react-native-purchases": "^9.15.0",
     "react-native-reanimated": "4.2.1",
@@ -71,7 +72,8 @@
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": [
-          "react-native-webrtc"
+          "react-native-webrtc",
+          "react-native-fs"
         ]
       }
     }
