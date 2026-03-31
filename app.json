@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "speaky",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -21,7 +20,7 @@
     },
     "android": {
       "package": "chat.speaky.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#08111f"
@@ -36,7 +35,6 @@
         "android.permission.WAKE_LOCK",
         "android.permission.BLUETOOTH"
       ],
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -56,7 +54,12 @@
           }
         }
       ],
-      "expo-dev-client",
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "launcher"
+        }
+      ],
       "expo-secure-store",
       "@react-native-community/datetimepicker",
       [
@@ -65,7 +68,10 @@
           "androidAppId": "ca-app-pub-3237855763291333~5680255634"
         }
       ],
-      "@config-plugins/react-native-webrtc"
+      "@config-plugins/react-native-webrtc",
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {
