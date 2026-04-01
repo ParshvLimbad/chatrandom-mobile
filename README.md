@@ -152,16 +152,17 @@ The app code is wired for RevenueCat, but you still need an active RevenueCat pr
 
 - Android app package: `chat.speaky.app`
 - Entitlement: `premium_filters`
-- Current offering with one monthly package
+- Current offering: `default`
+- Package: `$rc_monthly`
 - Android public SDK key added to `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY`
 - Webhook pointing to:
   - `https://zovddrxukactjyzchavo.supabase.co/functions/v1/revenuecat-webhook`
 
-Recommended product naming:
+Current product wiring:
 
-- Product ID: `speaky_premium_monthly`
+- Product ID: `speaky_plus`
 - Base plan: `monthly`
-- RevenueCat store identifier: `speaky_premium_monthly:monthly`
+- RevenueCat store identifier: `speaky_plus:monthly`
 
 ## Matchmaking Rules
 

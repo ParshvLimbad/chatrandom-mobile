@@ -1,11 +1,5 @@
-if (
-  __DEV__ &&
-  !process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY
-) {
-  console.warn(
-    "[env] Missing EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY. Configure it in .env to enable subscriptions.",
-  );
-}
+const DEFAULT_REVENUECAT_ANDROID_API_KEY =
+  "goog_LTqFIKpZYWULMIqItOHTzKJSQKM";
 
 export const env = {
   admobAppId:
@@ -18,7 +12,8 @@ export const env = {
     process.env.EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID ??
     "ca-app-pub-3237855763291333/3319386416",
   revenueCatAndroidApiKey:
-    process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY ?? "",
+    process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY ??
+    DEFAULT_REVENUECAT_ANDROID_API_KEY,
   supabaseAnonKey:
     process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdmRkcnh1a2FjdGp5emNoYXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyMzY1NTYsImV4cCI6MjA2NzgxMjU1Nn0.S0woMp4kLa8o2TWO1W2yuuAt9xUt59R2OFx21Z_ZqoM",

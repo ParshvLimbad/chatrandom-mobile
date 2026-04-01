@@ -10,7 +10,7 @@ import type {
   ProfileUpdateInput,
   SubscriptionState,
 } from "@/lib/domain";
-import { configurePurchases } from "@/lib/purchases";
+import { configurePurchases, getCustomerSubscriptionState } from "@/lib/purchases";
 import { supabase } from "@/lib/supabase";
 
 interface AuthState {
@@ -110,8 +110,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       user_id: session.user.id,
     };
 
+    let purchasesSubscription: SubscriptionState | null = null;
+
     try {
       await configurePurchases(session.user.id);
+      purchasesSubscription = await getCustomerSubscriptionState(session.user.id);
       const accountData = await fetchAccountData(session.user.id);
 
       set({
@@ -119,7 +122,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         preferences: accountData.preferences ?? defaultPreferences,
         profile: accountData.profile,
         session,
-        subscription: accountData.subscription ?? defaultSubscription,
+        subscription:
+          purchasesSubscription ?? accountData.subscription ?? defaultSubscription,
       });
     } catch (error) {
       const message =
@@ -132,7 +136,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         preferences: get().preferences ?? defaultPreferences,
         profile: get().profile,
         session,
-        subscription: get().subscription ?? defaultSubscription,
+        subscription:
+          purchasesSubscription ?? get().subscription ?? defaultSubscription,
       });
       throw error;
     }
@@ -219,11 +224,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
 
+    const purchasesSubscription = await getCustomerSubscriptionState(session.user.id);
     const accountData = await fetchAccountData(session.user.id);
     set({
       preferences: accountData.preferences ?? get().preferences,
       profile: accountData.profile ?? get().profile,
-      subscription: accountData.subscription ?? get().subscription,
+      subscription:
+        purchasesSubscription ?? accountData.subscription ?? get().subscription,
     });
   },
   updatePreferences: async (input) => {
